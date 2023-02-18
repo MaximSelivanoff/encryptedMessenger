@@ -1,12 +1,14 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Server
 {
     public class Account
     {
+        [Key]
         private int id;
         private string login;
-        private string password;
+        private string passwordHash;
         private void CheckingTheEnteredString(string forCheck, string fieldName)
         {
             var ex = new ArgumentException($"Поле {fieldName} заполнено неверно");
@@ -34,11 +36,11 @@ namespace Server
         }
         public string Password
         { 
-            get => password;
+            get => passwordHash;
             set
             {
                 CheckingTheEnteredString(value, nameof(Password));
-                password = value;
+                passwordHash = value;
             }
         }
         public Account(int id, string login, string password)
