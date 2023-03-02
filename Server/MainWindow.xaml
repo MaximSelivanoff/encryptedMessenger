@@ -13,7 +13,7 @@
     <DataGrid x:Name="AccountsDataGrid" AutoGenerateColumns="False" 
           EnableRowVirtualization="True" 
           ItemsSource="{Binding Source={StaticResource AccountViewSource}}" 
-          Margin="13,13,43,229" RowDetailsVisibilityMode="VisibleWhenSelected">
+          Margin="10,13,10,32" RowDetailsVisibilityMode="VisibleWhenSelected">
         <DataGrid.Columns>
             <DataGridTextColumn Binding="{Binding Id}"
                             Header="Id" Width="SizeToHeader"
