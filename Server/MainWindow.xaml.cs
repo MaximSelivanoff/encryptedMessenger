@@ -25,6 +25,7 @@ namespace Server
         }
         void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
+            db.Database.EnsureCreated();
             db.Accounts.Load();
             DataContext = db.Accounts.Local.ToObservableCollection();
             AccountViewSource.Source = DataContext;
