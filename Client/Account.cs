@@ -1,27 +1,20 @@
 ﻿using System;
 
-namespace Server
+namespace Client
 {
     public class Account
     {
-        private int id;
+        public int id;
         private string login;
         private string password;
         private void CheckingTheEnteredString(string forCheck, string fieldName)
         {
-            var ex = new ArgumentException($"Поле {fieldName} заполнено неверно");
-
             if (string.IsNullOrWhiteSpace(forCheck))
-                throw ex;
+                throw new ArgumentException(fieldName);
             if(forCheck.Contains(' '))
-                throw ex;
-            if (forCheck.Length < 8)
-                throw ex;
-        }
-        public int Id
-        {
-            get => id;
-            set => id = value;
+                throw new ArgumentException(fieldName);
+            if(forCheck.Length < 8)
+                throw new ArgumentException(fieldName);
         }
         public string Login
         {
@@ -45,7 +38,7 @@ namespace Server
         {
             Login = login;
             Password = password;
-            Id = id;
+            this.id = id;
         }
     }
 }

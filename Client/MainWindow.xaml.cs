@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Security;
 using System.Windows;
 using Microsoft.EntityFrameworkCore;
-using Server;
 
 namespace Client
 {
@@ -18,10 +16,10 @@ namespace Client
         public MainWindow()
         {
             InitializeComponent();
-            Loaded += MainWindowLoaded;
+            Loaded += MainWindow_Loaded;
         }
 
-        private void MainWindowLoaded(object sender, RoutedEventArgs e)
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             db.Database.EnsureCreated();
             db.Accounts.Load();
@@ -31,7 +29,7 @@ namespace Client
             DbOutputTextBox.Text = PrintAccounts(accounts);
         }
 
-        private void RegButton_Click(object sender, RoutedEventArgs e)
+        private void EnterButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -39,25 +37,18 @@ namespace Client
             }
             catch (ArgumentException ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show($"Поле {ex.Message} заполнено неверно");
             }
-
         }
         private void AddAccount()
         {
             Account account = RegisterNewAccount();
             db.Accounts.Add(account);
             db.SaveChanges();
-        }
 
-        private Account RegisterNewAccount()
-        {
-            var account = CreateNewAccount();
-            if (IsUnicLogin(account))
-                return account;
-            else throw new ArgumentException("Этот логин уже занят");
+            Log.Text += $"id: {account.id}, login: {account.Login}";
         }
-        private Account CreateNewAccount()
+        public Account RegisterNewAccount()
         {
             string login = LoginTextBox.Text;
             string password = PasswordTextBox.Password;
@@ -65,61 +56,14 @@ namespace Client
             var account = new Account(id, login, password);
             return account;
         }
-        private bool IsUnicLogin(Account account)
-        {
-            foreach (Account a in accounts)
-                if (account.Login == a.Login)
-                    return false;
-            return true;
-        }
-        private bool IsCorrectPassword(Account account)
-        {
-           var result = db.Accounts.Select(a => a).
-                Where(a => a.Login.
-                Equals(account.Login)).
-                Where(a => a.Password.
-                Equals(account.Password));
-            if(result.ToList().Count == 0)
-                return false;
-            else 
-                return true;
-        }
-        private void LogButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-
-
-                var account = CreateNewAccount();
-                if (!IsUnicLogin(account))
-                {
-                    if (IsCorrectPassword(account))
-                    {
-                        MessageBox.Show("Вы вошли в аккаунт");
-                    }
-                    else
-                        throw new ArgumentException("Неверный пароль");
-                }
-                else
-                {
-                    throw new ArgumentException("Неверный логин");
-                }
-            }
-            catch (ArgumentException ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
         public string PrintAccounts(List<Account> accounts)
         {
             string resultString = "";
             foreach(Account account in accounts)
             {
-                resultString += $"id: {account.Id}, login: {account.Login}\n";
+                resultString += $"id: {account.id}, login: {account.Login}\n";
             }
             return resultString;
         }
-
-
     }
 }
