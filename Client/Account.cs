@@ -1,12 +1,18 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Client
 {
     public class Account
     {
+<<<<<<< HEAD:Client/Account.cs
         public int id;
+=======
+        [Key]
+        private int id;
+>>>>>>> parent of 21aafab (Revert "Added MD5 to passwords"):Server/Account.cs
         private string login;
-        private string password;
+        private string passwordHash;
         private void CheckingTheEnteredString(string forCheck, string fieldName)
         {
             if (string.IsNullOrWhiteSpace(forCheck))
@@ -27,11 +33,11 @@ namespace Client
         }
         public string Password
         { 
-            get => password;
+            get => passwordHash;
             set
             {
                 CheckingTheEnteredString(value, nameof(Password));
-                password = value;
+                passwordHash = value;
             }
         }
         public Account(int id, string login, string password)

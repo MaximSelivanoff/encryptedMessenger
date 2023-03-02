@@ -23,6 +23,18 @@ namespace Server
         public MainWindow()
         {
             InitializeComponent();
+<<<<<<< HEAD
+=======
+            AccountViewSource =
+               (CollectionViewSource)FindResource(nameof(AccountViewSource));
+            Loaded += MainWindowLoaded;
+        }
+        void MainWindowLoaded(object sender, RoutedEventArgs e)
+        {
+            db.Accounts.Load();
+            DataContext = db.Accounts.Local.ToObservableCollection();
+            AccountViewSource.Source = DataContext;
+>>>>>>> parent of 21aafab (Revert "Added MD5 to passwords")
         }
     }
 }

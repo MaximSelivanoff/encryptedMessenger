@@ -8,5 +8,21 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
 
+<<<<<<< HEAD
     </Grid>
+=======
+    <DataGrid x:Name="AccountsDataGrid" AutoGenerateColumns="False" 
+          EnableRowVirtualization="True" 
+          ItemsSource="{Binding Source={StaticResource AccountViewSource}}" 
+          Margin="10,13,10,32" RowDetailsVisibilityMode="VisibleWhenSelected">
+        <DataGrid.Columns>
+            <DataGridTextColumn Binding="{Binding Id}"
+                            Header="Id" Width="SizeToHeader"
+                            IsReadOnly="True"/>
+            <DataGridTextColumn Binding="{Binding Login}" 
+                            Header="Login" 
+                            Width="*"/>
+        </DataGrid.Columns>
+    </DataGrid>
+>>>>>>> parent of 21aafab (Revert "Added MD5 to passwords")
 </Window>
