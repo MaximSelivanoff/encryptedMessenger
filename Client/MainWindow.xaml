@@ -17,7 +17,7 @@
         <TextBox x:Name="LoginTextBox" Margin="0,128,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="48" RenderTransformOrigin="0.5,0.5" FontSize="30" FontFamily="Tw Cen MT" BorderThickness="1" BorderBrush="#FF646464" HorizontalAlignment="Center" Width="250"/>
         <Label x:Name="LoginLabel" Content="Логин:" HorizontalAlignment="Center" Margin="0,94,0,0" VerticalAlignment="Top" Width="250" FontSize="14" RenderTransformOrigin="0.506,0.521"/>
         <Label x:Name="PasswordLabel" Content="Пароль:" HorizontalAlignment="Center" Height="29" Margin="0,181,0,0" VerticalAlignment="Top" Width="250"/>
-        <Image Margin="265,10,265,376" Source="/menu_banner.png" Stretch="Fill"/>
+        <Image Margin="265,10,265,376" Source="images/menu_banner.png" Stretch="Fill"/>
         <Label Content="Окно регистрации" HorizontalAlignment="Center" Margin="0,59,0,0" VerticalAlignment="Top" Width="250" FontSize="14"/>
         <Button x:Name="LogButton" Content="Войти" HorizontalAlignment="Center" Height="48" Margin="0,346,0,0" VerticalAlignment="Top" Width="250" FontSize="24" FontFamily="Tw Cen MT" BorderThickness="1" BorderBrush="#FF646464" Click="LogButton_Click"/>
 
