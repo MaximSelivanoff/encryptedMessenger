@@ -1,21 +1,27 @@
 ﻿using System;
 
-namespace Client
+namespace Server
 {
     public class Account
     {
         private int id;
->>>>>>> parent of 21aafab (Revert "Added MD5 to passwords"):Server/Account.cs
         private string login;
         private string password;
         private void CheckingTheEnteredString(string forCheck, string fieldName)
         {
+            var ex = new ArgumentException($"Поле {fieldName} заполнено неверно");
+
             if (string.IsNullOrWhiteSpace(forCheck))
-                throw new ArgumentException(fieldName);
+                throw ex;
             if(forCheck.Contains(' '))
-                throw new ArgumentException(fieldName);
-            if(forCheck.Length < 8)
-                throw new ArgumentException(fieldName);
+                throw ex;
+            if (forCheck.Length < 8)
+                throw ex;
+        }
+        public int Id
+        {
+            get => id;
+            set => id = value;
         }
         public string Login
         {
@@ -39,7 +45,7 @@ namespace Client
         {
             Login = login;
             Password = password;
-            this.id = id;
+            Id = id;
         }
     }
 }

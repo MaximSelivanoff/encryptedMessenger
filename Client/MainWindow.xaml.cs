@@ -25,10 +25,10 @@ namespace Client
         public ClientWindow()
         {
             InitializeComponent();
-            Loaded += MainWindow_Loaded;
+            Loaded += MainWindowLoaded;
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
             client = new core.Client();
             client.AddMessageHandler(MessageShow);

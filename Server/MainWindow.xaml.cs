@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Microsoft.EntityFrameworkCore;
 
 namespace Server
 {
@@ -26,8 +21,6 @@ namespace Server
         public MainWindow()
         {
             InitializeComponent();
-<<<<<<< HEAD
-=======
             AccountViewSource =
                (CollectionViewSource)FindResource(nameof(AccountViewSource));
             Loaded += MainWindowLoaded;
@@ -41,7 +34,6 @@ namespace Server
             db.Accounts.Load();
             DataContext = db.Accounts.Local.ToObservableCollection();
             AccountViewSource.Source = DataContext;
->>>>>>> parent of 21aafab (Revert "Added MD5 to passwords")
         }
 
         private void RegButton_Click(object sender, RoutedEventArgs e)

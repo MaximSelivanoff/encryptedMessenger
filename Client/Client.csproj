@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Server\Server.csproj" />
->>>>>>> parent of 21aafab (Revert "Added MD5 to passwords")
   </ItemGroup>
 
   <ItemGroup>

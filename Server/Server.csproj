@@ -7,8 +7,6 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
-<<<<<<< HEAD
-=======
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
       <PrivateAssets>all</PrivateAssets>
@@ -24,5 +22,4 @@
     </None>
   </ItemGroup>
 
->>>>>>> parent of 21aafab (Revert "Added MD5 to passwords")
 </Project>
