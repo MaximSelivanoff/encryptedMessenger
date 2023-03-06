@@ -12,10 +12,7 @@ namespace Server
     public class ApplicationContext : DbContext
     {
         public DbSet<Account> Accounts { get; set; } = null!;
-        public ApplicationContext()
-        {
-            Database.EnsureCreated();
-        }
+        public ApplicationContext() => Database.EnsureCreated();
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionString = GetConnectionStringFromJson();
@@ -30,6 +27,11 @@ namespace Server
             var config = builder.Build();
             string? connectionString = config.GetConnectionString("DefaultConnection");
             return connectionString;
+        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Account>().HasKey(u => u.Id);
+            modelBuilder.Entity<Account>().Property(e => e.Id).ValueGeneratedOnAdd();
         }
     }
 
