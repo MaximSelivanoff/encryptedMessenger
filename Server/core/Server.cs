@@ -116,15 +116,24 @@ namespace Server.core
 
         private void tryCheckPasswordAndTimeStampHash(string login, string clientPasswordAndTimestampHash)
         {
-            string passwordAndTimestampHash = GetAccByLogin(login).GetPasswordAndTimeStampHash();
-            if (passwordAndTimestampHash == clientPasswordAndTimestampHash)
+            try
             {
-                var dataString = ((int)MessageCodes.LoginSuccess).ToString();
+                string passwordAndTimestampHash = GetAccByLogin(login).GetPasswordAndTimeStampHash();
+                if (passwordAndTimestampHash == clientPasswordAndTimestampHash)
+                {
+                    var dataString = ((int)MessageCodes.LoginSuccess).ToString();
+                    var data = Encoding.UTF8.GetBytes(dataString);
+                    listener.Send(data);
+                    return;
+                }
+                throw new ArgumentException("Неверный пароль");
+            }
+            catch(ArgumentException ex)
+            {
+                var dataString = (int)MessageCodes.LoginError + "*/*" + ex.Message;
                 var data = Encoding.UTF8.GetBytes(dataString);
                 listener.Send(data);
-                return;
             }
-            throw new ArgumentException("Неверный пароль");
         }
         private Account GetAccByLogin(string login)
         {
