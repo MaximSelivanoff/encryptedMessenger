@@ -27,13 +27,13 @@ namespace Server
         }
         void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
-            server = new core.Server();
-            Task serverTask = new Task(server.Start);
-            serverTask.Start();
             db.Database.EnsureCreated();
             db.Accounts.Load();
             DataContext = db.Accounts.Local.ToObservableCollection();
             AccountViewSource.Source = DataContext;
+            server = new core.Server();
+            Task serverTask = new Task(server.Start);
+            serverTask.Start();
         }
 
         private void RegButton_Click(object sender, RoutedEventArgs e)

@@ -11,16 +11,6 @@ namespace Client
     /// </summary>
     public partial class ClientWindow : Window
     {
-        enum MessageCodes : int
-        {
-            AccForRegistration = 10,
-            RegistrationError = 11,
-            RegistrationSuccess = 12,
-
-            AccForLogin = 20,
-            LoginError = 21,
-            LoginSuccess = 22,
-        }
         core.Client client;
         public ClientWindow()
         {
@@ -39,7 +29,8 @@ namespace Client
         {
             try
             {
-                client.SendAcccount(LoginTextBox.Text, PasswordTextBox.Password);
+                client.SendAcccount(LoginTextBox.Text);
+                client.SetLoginAndPassword(LoginTextBox.Text, PasswordTextBox.Password);
             }
             catch (Exception ex)
             {

@@ -24,6 +24,9 @@
                 <DataGridTextColumn Binding="{Binding Password}" 
                             Header="Password" 
                             Width="*"/>
+                <DataGridTextColumn Binding="{Binding TimeStamp}" 
+                            Header="TimeStamp" 
+                            Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
         <PasswordBox x:Name="PasswordTextBox" HorizontalAlignment="Left" Margin="749,223,0,0" VerticalAlignment="Top" Width="250" Height="48" RenderTransformOrigin="0.5,0.5" FontSize="30" FontFamily="Tw Cen MT" BorderThickness="1" BorderBrush="#FF646464"/>
