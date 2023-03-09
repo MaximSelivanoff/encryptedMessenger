@@ -4,24 +4,12 @@ using System.Net.Sockets;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+using static Server.core.NetworkCodes;
 
 namespace Server.core
 {
     class Server
     {
-        enum MessageCodes : int
-        {
-            AccForRegistration = 10,
-            RegistrationError = 11,
-            RegistrationSuccess = 12,
-
-            AccForLogin = 20,
-            LoginError = 21,
-            LoginSuccess = 22,
-
-            TimeStampHash = 30,
-            LoginPasswordAndTimeStampHash = 31,
-        }
         ApplicationContext context;
         const string ip = "127.0.0.1";
         const int port = 8081;
@@ -100,7 +88,7 @@ namespace Server.core
             }
             catch (ArgumentException ex)
             {
-                var dataString = (int)MessageCodes.LoginError + "*/*" + ex.Message;
+                var dataString = GetMessage(MessageCodes.LoginError, ex.Message);
                 var data = Encoding.UTF8.GetBytes(dataString);
                 listener.Send(data);
             }
@@ -112,7 +100,8 @@ namespace Server.core
             {
                 var account = GetAccByLogin(login);
                 string timeStampHash = account.GetTimestampHash();
-                var dataString = ((int)MessageCodes.TimeStampHash).ToString() + "*/*" + timeStampHash;
+
+                var dataString = GetMessage(MessageCodes.TimeStampHash, timeStampHash);
                 var data = Encoding.UTF8.GetBytes(dataString);
                 listener.Send(data);
 
@@ -131,7 +120,7 @@ namespace Server.core
                 string passwordAndTimestampHash = GetAccByLogin(login).GetPasswordAndTimeStampHash();
                 if (passwordAndTimestampHash == clientPasswordAndTimestampHash)
                 {
-                    var dataString = ((int)MessageCodes.LoginSuccess).ToString();
+                    var dataString = GetMessage(MessageCodes.LoginSuccess);
                     var data = Encoding.UTF8.GetBytes(dataString);
                     listener.Send(data);
                     return;
@@ -140,7 +129,7 @@ namespace Server.core
             }
             catch(ArgumentException ex)
             {
-                var dataString = (int)MessageCodes.LoginError + "*/*" + ex.Message;
+                var dataString = GetMessage(MessageCodes.LoginError, ex.Message);
                 var data = Encoding.UTF8.GetBytes(dataString);
                 listener.Send(data);
             }
