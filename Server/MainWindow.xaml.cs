@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Server
 {
@@ -32,8 +34,11 @@ namespace Server
             DataContext = db.Accounts.Local.ToObservableCollection();
             AccountViewSource.Source = DataContext;
             server = new core.Server();
+            server.AddLogHandler(PrintLog);
             Task serverTask = new Task(server.Start);
             serverTask.Start();
+
+            LogTextBox.Text = "Лог сетевого взаимодействия:";
         }
 
         private void RegButton_Click(object sender, RoutedEventArgs e)
@@ -53,6 +58,16 @@ namespace Server
         {
             AccountViewSource.Source = null;
             AccountViewSource.Source = db.Accounts.ToList();
+        }
+        private void PrintLog(string log)
+        {
+            this.Dispatcher.Invoke(new Action(
+            delegate ()
+            {
+                LogTextBox.Text += log + "\n\n";
+            }
+            ));
+            
         }
     }
 }

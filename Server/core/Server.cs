@@ -4,9 +4,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Windows;
-using System.Security.Principal;
 
 namespace Server.core
 {
@@ -32,6 +29,8 @@ namespace Server.core
         Socket tcpSocket;
         Socket listener;
         StringBuilder data;
+        public delegate void LogHandler(string message);
+        LogHandler logHandler;
         public Server()
         {
             tcpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
@@ -65,10 +64,16 @@ namespace Server.core
             int messageCode = int.Parse(dataStrings[0]);
             if (messageCode == (int)MessageCodes.AccForLogin)
             {
+                string logMessage = ServerLogMessages.LoginRequestAccepted(dataStrings[1]);
+                logHandler(logMessage);
+
                 tryCheckLogin(dataStrings[1]);
             }
             if(messageCode == (int)MessageCodes.LoginPasswordAndTimeStampHash)
             {
+                string logMessage = ServerLogMessages.PasswordRequestChecked(dataStrings[1], dataStrings[2]);
+                logHandler(logMessage);
+
                 tryCheckPasswordAndTimeStampHash(dataStrings[1], dataStrings[2]);
             }
 
@@ -106,9 +111,14 @@ namespace Server.core
             if (!IsUnicLogin(login))
             {
                 var account = GetAccByLogin(login);
-                var dataString = ((int)MessageCodes.TimeStampHash).ToString() + "*/*" + account.GetTimestampHash();
+                string timeStampHash = account.GetTimestampHash();
+                var dataString = ((int)MessageCodes.TimeStampHash).ToString() + "*/*" + timeStampHash;
                 var data = Encoding.UTF8.GetBytes(dataString);
                 listener.Send(data);
+
+                string logMessage = ServerLogMessages.TimeStampHashSended(timeStampHash);
+                logHandler(logMessage);
+
                 return;
             }
             throw new ArgumentException("Неверный логин");
@@ -162,6 +172,16 @@ namespace Server.core
                 return false;
             else
                 return true;
+        }
+
+        public void AddLogHandler(LogHandler newHandler)
+        {
+            logHandler += newHandler;
+        }
+        public void RemoveLogHandler(LogHandler newHandler)
+        {
+            if(logHandler!= null)
+                logHandler -= newHandler;
         }
     }
 }

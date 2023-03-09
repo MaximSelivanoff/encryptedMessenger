@@ -52,8 +52,7 @@ namespace Client.core
         }
         public void Send(string sendMessage)
         {
-            var message = sendMessage;
-            var data = Encoding.UTF8.GetBytes(message);
+            var data = Encoding.UTF8.GetBytes(sendMessage);
             tcpSocket.Send(data);
         }
         public void SendAcccount(string login)
