@@ -38,7 +38,7 @@ namespace Server
             Task serverTask = new Task(server.Start);
             serverTask.Start();
 
-            LogTextBox.Text = "Лог сетевого взаимодействия:";
+            LogTextBox.Text = "Лог сетевого взаимодействия:\n\n";
         }
 
         private void RegButton_Click(object sender, RoutedEventArgs e)
