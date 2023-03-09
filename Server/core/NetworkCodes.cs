@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace Server.core
 {
+    /// <summary>
+    /// Классс для сетевого взаимодействия
+    /// </summary>
     static class NetworkCodes
     {
+        /// <summary>
+        /// Коды для отправки сообщений по сети
+        /// </summary>
         public enum MessageCodes : int
         {
             AccForRegistration = 10,
@@ -21,6 +27,12 @@ namespace Server.core
             TimeStampHash = 30,
             LoginPasswordAndTimeStampHash = 31,
         }
+        /// <summary>
+        /// По входным данным формирует строку для отправки
+        /// </summary>
+        /// <param name="code">Код сообщения</param>
+        /// <param name="paramsToSend">данные для передачи</param>
+        /// <returns></returns>
         public static string GetMessage (MessageCodes code, params string[] paramsToSend)
         {
             var builder = new StringBuilder ();
