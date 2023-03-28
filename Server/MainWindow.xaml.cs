@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace Server
             AccountViewSource.Source = DataContext;
             server = new core.Server();
             server.AddLogHandler(PrintLog);
-            Task serverTask = new Task(server.Start);
+            Task serverTask = new Task(async() => await server.StartAsync());
             serverTask.Start();
 
             LogTextBox.Text = "Лог сетевого взаимодействия:\n\n";

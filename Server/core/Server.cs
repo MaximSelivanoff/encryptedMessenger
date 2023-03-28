@@ -5,6 +5,8 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using static Server.core.NetworkCodes;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace Server.core
 {
@@ -14,22 +16,30 @@ namespace Server.core
         const string ip = "127.0.0.1";
         const int port = 8081;
         IPEndPoint tcpEndPoint;
-        Socket tcpSocket;
-        Socket listener;
+        Socket tcpListener;
         StringBuilder data;
         public delegate void LogHandler(string message);
         LogHandler logHandler;
         public Server()
         {
+            tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tcpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-            tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            tcpSocket.Bind(tcpEndPoint);
+            tcpListener.Bind(tcpEndPoint);
             context = new ApplicationContext();
         }
-        public void Start()
+        public async Task StartAsync()
         {
-            tcpSocket.Listen();
-            listener = tcpSocket.Accept();
+            tcpListener.Listen();
+
+            while (true)
+            {
+                var tcpClient = await tcpListener.AcceptAsync();
+                Task.Run(async () => await ClientProcessing(tcpClient));
+            }
+        }
+
+        async Task ClientProcessing(Socket tcpClient)
+        {
             while (true)
             {
                 data = new StringBuilder();
@@ -37,16 +47,18 @@ namespace Server.core
                 int size = 0;
                 do
                 {
-                    size = listener.Receive(buffer);
+                    size = tcpClient.Receive(buffer);
                     data.Append(Encoding.UTF8.GetString(buffer, 0, size));
                 }
-                while (listener.Available > 0);
-
-                DataProcessing(data);
+                while (tcpClient.Available > 0);
+                var dataToSend = DataProcessing(data);
+                await tcpClient.SendAsync(dataToSend);
             }
+            tcpClient.Shutdown(SocketShutdown.Both);
+            tcpClient.Close();
         }
 
-        void DataProcessing(StringBuilder data)
+         byte[] DataProcessing(StringBuilder data)
         {
             string[] dataStrings = data.ToString().Split("*/*");
             int messageCode = int.Parse(dataStrings[0]);
@@ -55,16 +67,18 @@ namespace Server.core
                 string logMessage = ServerLogMessages.LoginRequestAccepted(dataStrings[1]);
                 logHandler(logMessage);
 
-                tryCheckLogin(dataStrings[1]);
+                var returnData = tryCheckLogin(dataStrings[1]);
+                return returnData;
             }
             if(messageCode == (int)MessageCodes.LoginPasswordAndTimeStampHash)
             {
                 string logMessage = ServerLogMessages.PasswordRequestChecked(dataStrings[1], dataStrings[2]);
                 logHandler(logMessage);
 
-                tryCheckPasswordAndTimeStampHash(dataStrings[1], dataStrings[2]);
+                var returnData = tryCheckPasswordAndTimeStampHash(dataStrings[1], dataStrings[2]);
+                return returnData;
             }
-
+            return null;
         }
         public void tryRegistrateAccount(string login, string password)
         {
@@ -80,20 +94,21 @@ namespace Server.core
             }
             else throw new ArgumentException("Этот логин уже занят");
         }
-        void tryCheckLogin(string login)
+        byte[] tryCheckLogin(string login)
         {
             try
             {
-                CheckLogin(login);
+                var data = CheckLogin(login);
+                return data;
             }
             catch (ArgumentException ex)
             {
                 var dataString = GetMessage(MessageCodes.LoginError, ex.Message);
                 var data = Encoding.UTF8.GetBytes(dataString);
-                listener.Send(data);
+                return data;
             }
         }
-        private void CheckLogin(string login)
+        private byte[] CheckLogin(string login)
         {
             int id = context.Accounts.ToList().Count + 1;
             if (!IsUnicLogin(login))
@@ -103,17 +118,16 @@ namespace Server.core
 
                 var dataString = GetMessage(MessageCodes.TimeStampHash, timeStampHash);
                 var data = Encoding.UTF8.GetBytes(dataString);
-                listener.Send(data);
 
                 string logMessage = ServerLogMessages.TimeStampHashSended(timeStampHash);
                 logHandler(logMessage);
 
-                return;
+                return data;
             }
             throw new ArgumentException("Неверный логин");
         }
 
-        private void tryCheckPasswordAndTimeStampHash(string login, string clientPasswordAndTimestampHash)
+        private byte[] tryCheckPasswordAndTimeStampHash(string login, string clientPasswordAndTimestampHash)
         {
             try
             {
@@ -122,8 +136,7 @@ namespace Server.core
                 {
                     var dataString = GetMessage(MessageCodes.LoginSuccess);
                     var data = Encoding.UTF8.GetBytes(dataString);
-                    listener.Send(data);
-                    return;
+                    return data;
                 }
                 throw new ArgumentException("Неверный пароль");
             }
@@ -131,7 +144,7 @@ namespace Server.core
             {
                 var dataString = GetMessage(MessageCodes.LoginError, ex.Message);
                 var data = Encoding.UTF8.GetBytes(dataString);
-                listener.Send(data);
+                return data;
             }
         }
         private Account GetAccByLogin(string login)
