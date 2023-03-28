@@ -35,7 +35,7 @@ namespace Server
         /// <returns></returns>
         public static string PasswordRequestChecked(string login, string timeStampHash)
         {
-            string message = $"{DateTime.Now}\nПринят для проверки хэш пароля от пользователя:\nЛогин:{login} \nХэш: {timeStamЫpHash}";
+            string message = $"{DateTime.Now}\nПринят для проверки хэш пароля от пользователя:\nЛогин:{login} \nХэш: {timeStampHash}";
             return message;
         }
     }
