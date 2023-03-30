@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server.core
+namespace CoreLib
 {
     /// <summary>
     /// Классс для сетевого взаимодействия
     /// </summary>
-    static class NetworkCodes
+    public static class NetworkCodes
     {
         /// <summary>
         /// Коды для отправки сообщений по сети
@@ -26,6 +26,8 @@ namespace Server.core
 
             TimeStampHash = 30,
             LoginPasswordAndTimeStampHash = 31,
+
+            RsaKeyExchange = 999,
         }
         /// <summary>
         /// По входным данным формирует строку для отправки
@@ -42,6 +44,7 @@ namespace Server.core
                 builder.Append("*/*");
                 builder.Append(msg);
             }
+            builder.Append("*/*");
             string message = builder.ToString ();
             return message;
         }

@@ -1,27 +1,16 @@
-﻿using System;
+﻿using Server;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using CoreLib;
+using System.Numerics;
 
 namespace Client.core
 {
     internal class Client
     {
-        enum MessageCodes : int
-        {
-            AccForRegistration = 10,
-            RegistrationError = 11,
-            RegistrationSuccess = 12,
-
-            AccForLogin = 20,
-            LoginError = 21,
-            LoginSuccess = 22,
-
-            TimeStampHash = 30,
-            LoginPasswordAndTimeStampHash = 31,
-        }
-
         public delegate void MessageHandler(string message);
         MessageHandler messageHandler;
         const string ip = "127.0.0.1";
@@ -57,7 +46,7 @@ namespace Client.core
         }
         public void SendAcccount(string login)
         {
-            string toSendString = ((int)MessageCodes.AccForLogin).ToString() + "*/*" + login;
+            string toSendString = ((int)NetworkCodes.MessageCodes.AccForLogin).ToString() + "*/*" + login;
             Send(toSendString);
         }
 
@@ -76,7 +65,7 @@ namespace Client.core
                 }
                 while (listener.Available > 0);
 
-                if(answer.Length > 0)
+                if (answer.Length > 0)
                     tryProcessingAnswer(answer);
             }
         }
@@ -86,7 +75,7 @@ namespace Client.core
             {
                 ProcessingAnswer(answer);
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 messageHandler(ex.Message);
             }
@@ -96,25 +85,53 @@ namespace Client.core
             var answerStrings = answer.ToString().Split("*/*");
             switch (int.Parse(answerStrings[0]))
             {
-                case (int)MessageCodes.LoginSuccess:
+                case (int)NetworkCodes.MessageCodes.LoginSuccess:
                     messageHandler("Вы вошли в аккаунт");
                     break;
-                case (int)MessageCodes.LoginError:
+                case (int)NetworkCodes.MessageCodes.LoginError:
                     throw new ArgumentException(answerStrings[1]);
-                case (int)MessageCodes.RegistrationSuccess:
+                case (int)NetworkCodes.MessageCodes.RegistrationSuccess:
                     messageHandler("Аккаунт создан");
                     break;
-                case (int)MessageCodes.RegistrationError:
+                case (int)NetworkCodes.MessageCodes.RegistrationError:
                     throw new ArgumentException(answerStrings[1]);
-                case (int)MessageCodes.TimeStampHash:
+                case (int)NetworkCodes.MessageCodes.TimeStampHash:
                     SendLoginPasswordAndTimeStampHash(answerStrings[1]);
                     break;
+                case (int)NetworkCodes.MessageCodes.RsaKeyExchange:
+                    RsaKeyProcessing(answerStrings[1], answerStrings[2], answerStrings[3], answerStrings[4]);
+                    break;
+
+            }
+        }
+        private void RsaKeyProcessing(string nonce, string encodedNonceHashString, string N, string e)
+        {
+            // сравнение полученного сообщения и вычисленного
+            var nonseHashForCheck = Account.GetHashMD5(nonce);
+            var dataForCheck = Rsa.EncodeWithEnAlph(nonseHashForCheck, BigInteger.Parse(e), BigInteger.Parse(N));
+            var encodedForCheck = Rsa.EncodeToString(dataForCheck);
+            if (encodedForCheck == encodedNonceHashString)
+            {
+                // вычисление сообщения для сервера
+                var nonceClient = Rsa.GenerateBigInt(256);
+                var nonceHashCient = Account.GetHashMD5(nonceClient.ToString());
+                var rsaClient = new Rsa(256);
+                var encodedNonceHashClient = rsaClient.Encode(nonceHashCient);
+                var encodedNonceHashStringClient = Rsa.EncodeToString(encodedNonceHashClient);
+
+                (var NClient, var eClient) = rsaClient.GetPublicKey();
+                var resultString = NetworkCodes.GetMessage(NetworkCodes.MessageCodes.RsaKeyExchange,
+                                                       nonceClient.ToString(),
+                                                       encodedNonceHashStringClient,
+                                                       NClient.ToString(),
+                                                       eClient.ToString());
+                Send(resultString);
             }
         }
         private void SendLoginPasswordAndTimeStampHash(string TimeStampHash)
         {
             string PasswordAndTimeStampHash = GetHashMD5(GetHashMD5(clientPassword) + TimeStampHash);
-            string toSendString = (int)MessageCodes.LoginPasswordAndTimeStampHash
+            string toSendString = (int)NetworkCodes.MessageCodes.LoginPasswordAndTimeStampHash
                                   + "*/*" + clientLogin
                                   + "*/*" + PasswordAndTimeStampHash;
             Send(toSendString);

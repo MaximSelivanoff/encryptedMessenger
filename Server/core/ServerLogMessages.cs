@@ -12,7 +12,7 @@ namespace Server
         /// </summary>
         /// <param name="registratedLogin"></param>
         /// <returns>Лог запроса аутентифиации по логину</returns>
-        public static string LoginRequestAccepted(string registratedLogin)
+        public static string LoginRequestReceiving(string registratedLogin)
         {
             string message = $"{DateTime.Now}\nПринят запрос на аутентификацию пользователя {registratedLogin}";
             return message;
@@ -36,6 +36,38 @@ namespace Server
         public static string PasswordRequestChecked(string login, string timeStampHash)
         {
             string message = $"{DateTime.Now}\nПринят для проверки хэш пароля от пользователя:\nЛогин:{login} \nХэш: {timeStampHash}";
+            return message;
+        }
+
+        public static string RsaKeyExchangeDataSended(string nonce, string encodedNonceHashString, string N, string e)
+        {
+            string message = $"{DateTime.Now}\nОтправлены данные Rsa:" +
+                                            $"\nСлучайное число:{nonce} " +
+                                            $"\nЗашифрованный хэш случайного числа: {encodedNonceHashString}" +
+                                            $"\nОткрытый ключ: " +
+                                            $"\nN = {N} " +
+                                            $"\ne = {e} ";
+            return message;
+        }
+        public static string RsaKeyExchangeDataReceiving(string nonce, string encodedNonceHashString, string N, string e)
+        {
+            string message = $"{DateTime.Now}\nПолучены данные Rsa:" +
+                                            $"\nСлучайное число:{nonce} " +
+                                            $"\nЗашифрованный хэш случайного числа: {encodedNonceHashString}" +
+                                            $"\nОткрытый ключ: " +
+                                            $"\nN = {N} " +
+                                            $"\ne = {e} ";
+            return message;
+        }
+        public static string RsaKeyExchangeDataReceivingFail(string nonce, string encodedNonceHashString, string N, string e)
+        {
+            string message = $"{DateTime.Now}\nПолучены НЕВЕРНЫЕ данные Rsa:" +
+                                            $"\nСлучайное число:{nonce} " +
+                                            $"\nЗашифрованный хэш случайного числа: {encodedNonceHashString}" +
+                                            $"\nОткрытый ключ: " +
+                                            $"\nN = {N} " +
+                                            $"\ne = {e} "
+                                            ;
             return message;
         }
     }
