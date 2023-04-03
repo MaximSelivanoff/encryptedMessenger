@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using CoreLib;
 using System.Numerics;
+using System.Windows.Controls;
 
 namespace Client.core
 {
@@ -113,7 +114,7 @@ namespace Client.core
             if (encodedForCheck == encodedNonceHashString)
             {
                 // вычисление сообщения для сервера
-                var nonceClient = Rsa.GenerateBigInt(256);
+                var nonceClient = CryptoAlgorithms.GenerateBigInt(256);
                 var nonceHashCient = Account.GetHashMD5(nonceClient.ToString());
                 var rsaClient = new Rsa(256);
                 var encodedNonceHashClient = rsaClient.Encode(nonceHashCient);

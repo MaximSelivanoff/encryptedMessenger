@@ -35,10 +35,9 @@ namespace Server.core
             while (true)
             {
                 var tcpClient = await tcpListener.AcceptAsync();
-                Task.Run(async () => await ClientProcessing(tcpClient));
+                await ClientProcessing(tcpClient);
             }
         }
-
         async Task ClientProcessing(Socket tcpClient)
         {
             while (true)
@@ -48,17 +47,15 @@ namespace Server.core
                 int size = 0;
                 do
                 {
-                    size = tcpClient.Receive(buffer);
+                    size = await tcpClient.ReceiveAsync(buffer);
                     data.Append(Encoding.UTF8.GetString(buffer, 0, size));
                 }
                 while (tcpClient.Available > 0);
-                //await Task.Run(async () => await DataProcessing(data, tcpClient)).ConfigureAwait(false);
                 await DataProcessing(data, tcpClient);
             }
             tcpClient.Shutdown(SocketShutdown.Both);
             tcpClient.Close();
         }
-
         async Task DataProcessing(StringBuilder data, Socket tcpClient)
         {
             string[] dataStrings = data.ToString().Split("*/*");
@@ -163,7 +160,6 @@ namespace Server.core
             }
             throw new ArgumentException("Неверный логин");
         }
-
         private byte[] tryCheckPasswordAndTimeStampHash(string login, string clientPasswordAndTimestampHash)
         {
             try

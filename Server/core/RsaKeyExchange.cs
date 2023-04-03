@@ -8,7 +8,7 @@ namespace Server.core
     {
         public static string GenKeyMessForClient(LogHandler logHandler)
         {
-            var nonce = Rsa.GenerateBigInt(256);
+            var nonce = CryptoAlgorithms.GenerateBigInt(256);
             var nonceHash = Account.GetHashMD5(nonce.ToString());
 
             var rsa = new Rsa(256);
