@@ -6,15 +6,11 @@ namespace Server
 {
     public class Account
     {
-        private int id;
         private string login;
         private string passwordHash;
         private DateTime timeStamp;
-        public int Id
-        {
-            get => id;
-            set => id = value;
-        }
+        public int Id { get; set; }
+
         public string Login
         {
             get => login;
@@ -67,6 +63,8 @@ namespace Server
             Id = id;
             timeStamp = DateTime.Now;
         }
+
+
         public string GetPasswordAndTimeStampHash()
         {
             return GetHashMD5(Password + GetTimestampHash());

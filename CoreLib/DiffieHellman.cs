@@ -1,30 +1,51 @@
 ﻿using System;
-using System.Security.Cryptography;
 using System.Numerics;
 using CoreLib;
 
-class DiffieHellman
+public class DiffieHellman
 {
     private readonly int _keySize;
     private readonly BigInteger _prime;
     private readonly BigInteger _generator;
-    private readonly RNGCryptoServiceProvider _rng;
+    private readonly Random _rng;
+    private readonly BigInteger _privateKey;
+    private readonly BigInteger _publicKey;
 
-    public DiffieHellman(int keySize = 256)
+    public DiffieHellman(int keySize = 16)
     {
         _keySize = keySize;
-        _rng = new RNGCryptoServiceProvider();
+        _rng = new Random();
 
         // Генерация простого числа и примитивного корня
-        _prime = GeneratePrime();
+        _prime = CryptoAlgorithms.Generate_Random_Prime(keySize);
         _generator = GenerateGenerator();
+
+        _privateKey = GeneratePrivateKey();
+        _publicKey = GeneratePublicKey();
     }
 
-    public BigInteger GeneratePrivateKey()
+    public BigInteger PublicKey
+    {
+        get { return _publicKey; }
+    }
+    public BigInteger GenerateSharedSecret(BigInteger otherPublicKey)
+    {
+        // Вычисление общего секретного ключа
+        BigInteger sharedSecret = BigInteger.ModPow(otherPublicKey, _privateKey, _prime);
+        return sharedSecret;
+    }
+    private BigInteger GeneratePublicKey()
+    {
+        // Вычисление открытого ключа
+        BigInteger publicKey = BigInteger.ModPow(_generator, _privateKey, _prime);
+        return publicKey;
+    }
+
+    private BigInteger GeneratePrivateKey()
     {
         // Генерация случайного секретного ключа
         byte[] bytes = new byte[_keySize / 8];
-        _rng.GetBytes(bytes);
+        _rng.NextBytes(bytes);
         BigInteger privateKey = new BigInteger(bytes);
 
         // Убедимся, что секретный ключ меньше, чем простое число
@@ -32,38 +53,8 @@ class DiffieHellman
         {
             privateKey %= _prime - 1;
         }
-
+        privateKey = BigInteger.Abs(privateKey);
         return privateKey;
-    }
-
-    public BigInteger GeneratePublicKey(BigInteger privateKey)
-    {
-        // Вычисление открытого ключа
-        BigInteger publicKey = BigInteger.ModPow(_generator, privateKey, _prime);
-        return publicKey;
-    }
-
-    public BigInteger GenerateSharedSecret(BigInteger privateKey, BigInteger otherPublicKey)
-    {
-        // Вычисление общего секретного ключа
-        BigInteger sharedSecret = BigInteger.ModPow(otherPublicKey, privateKey, _prime);
-        return sharedSecret;
-    }
-
-    private BigInteger GeneratePrime()
-    {
-        // Генерация случайного простого числа длиной _keySize бит
-        BigInteger prime;
-        do
-        {
-            byte[] bytes = new byte[_keySize / 8];
-            _rng.GetBytes(bytes);
-            prime = new BigInteger(bytes);
-            prime = BigInteger.Abs(prime);
-            prime = BigIntegerExtensions.NextPrime(prime);
-        } while (CryptoAlgorithms.MillerRabinTest(prime, CryptoAlgorithms.CountBits(prime)));
-
-        return prime;
     }
 
     private BigInteger GenerateGenerator()
@@ -73,7 +64,7 @@ class DiffieHellman
         do
         {
             byte[] bytes = new byte[_keySize / 8];
-            _rng.GetBytes(bytes);
+            _rng.NextBytes(bytes);
             generator = new BigInteger(bytes);
             generator = BigInteger.Abs(generator);
         } while (!IsPrimitiveRoot(generator));
@@ -93,18 +84,5 @@ class DiffieHellman
         }
 
         return true;
-    }
-}
-
-// Вспомогательный класс для поиска следующего простого числа
-public static class BigIntegerExtensions
-{
-    public static BigInteger NextPrime(BigInteger number)
-    {
-        while (!CryptoAlgorithms.MillerRabinTest(number, CryptoAlgorithms.CountBits(number)))
-        {
-            number++;
-        }
-        return number;
     }
 }

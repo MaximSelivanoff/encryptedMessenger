@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CoreLib;
 using System.Numerics;
-using System.ComponentModel.Design;
 
 namespace Server.core
 {
@@ -21,6 +20,7 @@ namespace Server.core
         StringBuilder data;
         public delegate void LogHandler(string message);
         public LogHandler logHandler;
+        DiffieHellman Alice;
         public Server()
         {
             tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -92,27 +92,61 @@ namespace Server.core
             }
             if (messageCode == (int)NetworkCodes.MessageCodes.RsaKeyExchange)
             {
-                RsaKeyProcessing(dataStrings[1], dataStrings[2], dataStrings[3], dataStrings[4]);
+                bool startDiffieHellman;
+                var returnData = RsaKeyProcessing(dataStrings[1], dataStrings[2], dataStrings[3], dataStrings[4], out startDiffieHellman);
+                await tcpClient.SendAsync(returnData);
+                if(startDiffieHellman)
+                {
+                    Alice = new DiffieHellman();
+                    var dataString = DiffieHellmanExchange.GenKeyMessForClient(Alice, logHandler);
+                    returnData = Encoding.UTF8.GetBytes(dataString);
+                    await tcpClient.SendAsync(returnData);
+                }
             }
+            if(messageCode == (int)NetworkCodes.MessageCodes.DiffieHellmanExchange)
+            {
+                bool startNext;
+                var returnData = DiffieHellmanProcessing(dataStrings[1], out startNext);
+                await tcpClient.SendAsync(returnData);
+            }
+
         }
+
         string RsaKeyExchangeMessageGen()
         {
             return RsaKeyExchange.GenKeyMessForClient(logHandler);
         }
-        private void RsaKeyProcessing(string nonce, string encodedNonceHashString, string N, string e)
+        private byte[] RsaKeyProcessing(string nonce, string encodedNonceHashString, string N, string e, out bool doNextStep)
         {
             // сравнение полученного сообщения и вычисленного
             var nonseHashForCheck = Account.GetHashMD5(nonce);
             var dataForCheck = Rsa.EncodeWithEnAlph(nonseHashForCheck, BigInteger.Parse(e), BigInteger.Parse(N));
             var encodedForCheck = Rsa.EncodeToString(dataForCheck);
+            string dataString;
             if (encodedForCheck == encodedNonceHashString)
             {
+                doNextStep = true;
                 logHandler(ServerLogMessages.RsaKeyExchangeDataReceiving(nonce, encodedNonceHashString, N, e));
+                dataString = NetworkCodes.GetMessage(NetworkCodes.MessageCodes.RsaKeyExchangeSuccess);
             }
             else
             {
+                doNextStep  = false;
                 logHandler(ServerLogMessages.RsaKeyExchangeDataReceivingFail(nonce, encodedNonceHashString, N, e));
+                dataString = NetworkCodes.GetMessage(NetworkCodes.MessageCodes.RsaKeyExchangeError);
             }
+            var data = Encoding.UTF8.GetBytes(dataString);
+            return data;
+        }
+        private byte[] DiffieHellmanProcessing(string otherPublicKey, out bool startNext)
+        {
+            Alice = new DiffieHellman();
+            var secret = Alice.GenerateSharedSecret(BigInteger.Parse(otherPublicKey));
+            var dataString = NetworkCodes.GetMessage(NetworkCodes.MessageCodes.DiffieHellmanExchangeSuccess);
+            var data = Encoding.UTF8.GetBytes(dataString);
+            logHandler(ServerLogMessages.DiffieHellmanExchangeDataRecieving(otherPublicKey, secret.ToString()));
+            startNext = true;
+            return data;
         }
         public void tryRegistrateAccount(string login, string password)
         {

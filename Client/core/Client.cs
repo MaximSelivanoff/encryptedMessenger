@@ -19,6 +19,7 @@ namespace Client.core
         IPEndPoint tcpEndPoint;
         Socket tcpSocket;
         Socket listener;
+        DiffieHellman Bob;
 
         string clientLogin;
         string clientPassword;
@@ -102,9 +103,28 @@ namespace Client.core
                 case (int)NetworkCodes.MessageCodes.RsaKeyExchange:
                     RsaKeyProcessing(answerStrings[1], answerStrings[2], answerStrings[3], answerStrings[4]);
                     break;
-
+                case (int)NetworkCodes.MessageCodes.DiffieHellmanExchange:
+                    DiffieHellmanProcessing(answerStrings[1]);
+                    messageHandler("Получен запрос на соединение по Диффи-Хеллману");
+                    break;
+                case (int)NetworkCodes.MessageCodes.DiffieHellmanExchangeSuccess:
+                    messageHandler("Обмен ключами по протоолу Диффи-Хеллмана прошёл успешно");
+                    break;
+                case (int)NetworkCodes.MessageCodes.DiffieHellmanExchangeError:
+                    messageHandler("Обмен ключами по протоколу Диффи-Хеллмана не удался");
+                    break;
             }
         }
+
+        private void DiffieHellmanProcessing(string otherKey)
+        {
+            Bob = new DiffieHellman();
+            Bob.GenerateSharedSecret(BigInteger.Parse(otherKey));
+            var publicKey = Bob.PublicKey.ToString();
+            var resultString = NetworkCodes.GetMessage(NetworkCodes.MessageCodes.DiffieHellmanExchange, publicKey);
+            Send(resultString);
+        }
+
         private void RsaKeyProcessing(string nonce, string encodedNonceHashString, string N, string e)
         {
             // сравнение полученного сообщения и вычисленного

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Policy;
 
 namespace Server
 {
@@ -51,7 +52,7 @@ namespace Server
         }
         public static string RsaKeyExchangeDataReceiving(string nonce, string encodedNonceHashString, string N, string e)
         {
-            string message = $"{DateTime.Now}\nПолучены данные Rsa:" +
+            string message = $"{DateTime.Now}\nПолучены ВЕРНЫЕ данные Rsa:" +
                                             $"\nСлучайное число:{nonce} " +
                                             $"\nЗашифрованный хэш случайного числа: {encodedNonceHashString}" +
                                             $"\nОткрытый ключ: " +
@@ -68,6 +69,17 @@ namespace Server
                                             $"\nN = {N} " +
                                             $"\ne = {e} "
                                             ;
+            return message;
+        }
+        public static string DiffieHellmanExchangeDataSended(string publicKey)
+        {
+            string message = $"{DateTime.Now}\nОтправлен публичный ключ Диффи-Хеллмана: {publicKey}";
+            return message;
+        }
+        public static string DiffieHellmanExchangeDataRecieving(string otherKey, string sharedKey)
+        {
+            string message = $"{DateTime.Now}\nПолучен открытый ключ пользователя: {otherKey}" +
+                             $"\nОбщий ключ Диффи-Хеллмана сгенерирован: {sharedKey}";
             return message;
         }
     }

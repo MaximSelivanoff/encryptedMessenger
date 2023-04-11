@@ -56,7 +56,6 @@ namespace CoreLib
                 e = (e + 1) % f;
             }
             while (!CryptoAlgorithms.MillerRabinTest(e, CryptoAlgorithms.CountBits(e)) || f % e == 0 || e == p || e == q);
-
             //генерация закрытого ключа
             BigInteger x = 0, y = 11111; // будет нужен только y
             CryptoAlgorithms.ExtendedEuclid(f, e, ref x, ref y);

@@ -27,7 +27,15 @@ namespace CoreLib
             TimeStampHash = 30,
             LoginPasswordAndTimeStampHash = 31,
 
-            RsaKeyExchange = 999,
+            RsaKeyExchange = 40,
+            RsaKeyExchangeError = 41,
+            RsaKeyExchangeSuccess = 42,
+
+            DiffieHellmanExchange = 50,
+            DiffieHellmanExchangeError = 51,
+            DiffieHellmanExchangeSuccess = 52,
+
+
         }
         /// <summary>
         /// По входным данным формирует строку для отправки
@@ -35,6 +43,7 @@ namespace CoreLib
         /// <param name="code">Код сообщения</param>
         /// <param name="paramsToSend">данные для передачи</param>
         /// <returns></returns>
+        /// 
         public static string GetMessage (MessageCodes code, params string[] paramsToSend)
         {
             var builder = new StringBuilder ();
