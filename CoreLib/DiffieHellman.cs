@@ -1,29 +1,39 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using CoreLib;
 
 public class DiffieHellman
 {
     private readonly int _keySize;
-    private readonly BigInteger _prime;
-    private readonly BigInteger _generator;
+    public BigInteger _prime { get; }
+    public BigInteger _generator { get;}
     private readonly Random _rng;
     private readonly BigInteger _privateKey;
     private readonly BigInteger _publicKey;
 
-    public DiffieHellman(int keySize = 16)
+    public DiffieHellman(int keySize = 48)
     {
         _keySize = keySize;
         _rng = new Random();
 
         // Генерация простого числа и примитивного корня
         _prime = CryptoAlgorithms.Generate_Random_Prime(keySize);
-        _generator = GenerateGenerator();
-
+        _generator = findPrimitive(_prime);
+        //_generator = findPrimitive(_prime);
         _privateKey = GeneratePrivateKey();
         _publicKey = GeneratePublicKey();
     }
-
+    public DiffieHellman(BigInteger p, BigInteger g, int keySize = 16)
+    {
+        _keySize = keySize;
+        _rng = new Random();
+        _prime = p;
+        _generator = g;
+        //_generator = findPrimitive(_prime);
+        _privateKey = GeneratePrivateKey();
+        _publicKey = GeneratePublicKey();
+    }
     public BigInteger PublicKey
     {
         get { return _publicKey; }
@@ -56,33 +66,50 @@ public class DiffieHellman
         privateKey = BigInteger.Abs(privateKey);
         return privateKey;
     }
-
-    private BigInteger GenerateGenerator()
+    static void findPrimefactors(List<BigInteger> s, BigInteger n)
     {
-        // Генерация примитивного корня
-        BigInteger generator;
-        do
+        for (BigInteger i = 3; i*i <= n; i++)
         {
-            byte[] bytes = new byte[_keySize / 8];
-            _rng.NextBytes(bytes);
-            generator = new BigInteger(bytes);
-            generator = BigInteger.Abs(generator);
-        } while (!IsPrimitiveRoot(generator));
-
-        return generator;
-    }
-
-    private bool IsPrimitiveRoot(BigInteger candidate)
-    {
-        // Проверка, является ли число candidate примитивным корнем
-        for (int i = 2; i < _prime - 1; i++)
-        {
-            if (BigInteger.ModPow(candidate, i, _prime) == 1)
+            while (n % i == 0)
             {
-                return false;
+                s.Add(i);
+                n = n / i;
             }
         }
+        if (n > 2)
+        {
+            s.Add(n);
+        }
+    }
+    static int findPrimitive(BigInteger n)
+    {
+        var s = new List<BigInteger>();
 
-        return true;
+        if (CryptoAlgorithms.MillerRabinTest(n, CryptoAlgorithms.CountBits(n)) == false)
+        {
+            return -1;
+        }
+
+        var phi = n - 1;
+
+        findPrimefactors(s, phi);
+
+        for (int r = 2; r <= phi; r++)
+        {
+            bool flag = false;
+            foreach (BigInteger a in s)
+            {
+                if (BigInteger.ModPow(r, phi / (a), n) == 1)
+                {
+                    flag = true;
+                    break;
+                }
+            }
+            if (flag == false)
+            {
+                return r;
+            }
+        }
+        return -1;
     }
 }
