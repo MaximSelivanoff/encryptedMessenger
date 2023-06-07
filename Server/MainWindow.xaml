@@ -10,6 +10,10 @@
         <CollectionViewSource x:Key="AccountViewSource"/>
     </Window.Resources>
     <Grid Margin="0,0,0,-6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="7*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="373*"/>
             <ColumnDefinition Width="259*"/>
@@ -17,7 +21,7 @@
         <DataGrid x:Name="AccountsDataGrid" AutoGenerateColumns="False" 
           EnableRowVirtualization="True" 
           ItemsSource="{Binding Source={StaticResource AccountViewSource}}" 
-          Margin="13,13,6,10" RowDetailsVisibilityMode="VisibleWhenSelected">
+          Margin="13,13,6,12" RowDetailsVisibilityMode="VisibleWhenSelected">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Id}"
                             Header="Id" Width="SizeToHeader"
@@ -33,13 +37,18 @@
                             Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
-        <PasswordBox x:Name="PasswordTextBox" HorizontalAlignment="Center" Margin="0,219,0,0" VerticalAlignment="Top" Width="250" Height="48" RenderTransformOrigin="0.5,0.5" FontSize="30" FontFamily="Tw Cen MT" BorderThickness="1" BorderBrush="#FF646464" Grid.Column="1"/>
+        <PasswordBox x:Name="PasswordTextBox" HorizontalAlignment="Center" Margin="0,219,0,0" VerticalAlignment="Top" Width="250" Height="48" RenderTransformOrigin="0.5,0.5" FontSize="30" FontFamily="Tw Cen MT" BorderThickness="1" BorderBrush="#FF646464" Grid.Column="1" Grid.RowSpan="2"/>
         <TextBox x:Name="LoginTextBox" Margin="0,132,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="48" RenderTransformOrigin="0.5,0.5" FontSize="30" FontFamily="Tw Cen MT" BorderThickness="1" BorderBrush="#FF646464" HorizontalAlignment="Center" Width="250" Grid.Column="1"/>
         <Label x:Name="LoginLabel" Content="Логин:" HorizontalAlignment="Center" Margin="0,98,0,0" VerticalAlignment="Top" Width="250" FontSize="14" RenderTransformOrigin="0.506,0.521" Grid.Column="1" Height="29"/>
         <Label x:Name="PasswordLabel" Content="Пароль:" HorizontalAlignment="Center" Height="29" Margin="0,185,0,0" VerticalAlignment="Top" Width="250" Grid.Column="1"/>
-        <Button x:Name="RegButton" Content="Зарегестрироваться" HorizontalAlignment="Center" Height="48" Margin="0,294,0,0" VerticalAlignment="Top" Width="250" FontSize="24" FontFamily="Tw Cen MT" BorderThickness="1" BorderBrush="#FF646464" Click="RegButton_Click" Grid.Column="1"/>
+        <Button x:Name="RegButton" Content="Зарегестрироваться" HorizontalAlignment="Center" Height="48" Margin="0,39,0,0" VerticalAlignment="Top" Width="250" FontSize="24" FontFamily="Tw Cen MT" BorderThickness="1" BorderBrush="#FF646464" Click="RegButton_Click" Grid.Column="1" Grid.Row="1"/>
         <Label x:Name="HeadLineLabel" Content="Регистрация новых аккаунтов:" HorizontalAlignment="Center" Margin="0,56,0,0" VerticalAlignment="Top" Width="350" FontSize="24" RenderTransformOrigin="0.506,0.521" Grid.Column="1" Height="42"/>
-        <TextBox x:Name="LogTextBox" Grid.Column="1" HorizontalAlignment="Center" Margin="0,347,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="498" Height="255"
-                  AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+        <TextBox x:Name="LogTextBox" HorizontalAlignment="Left" Margin="13,0,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Center" Width="723" Height="337"
+                  AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Grid.Row="1"/>
+
+        <TextBox x:Name="OutputMessageTextBlock" IsEnabled="True" Grid.Column="1" HorizontalAlignment="Center" Margin="0,150,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="236" Height="53" Grid.Row="1"/>
+        <Button x:Name="SendMessageButton" Grid.Column="1" Content="Отправить" HorizontalAlignment="Left" Height="53" Margin="382,150,0,0" VerticalAlignment="Top" Width="74" Click="SendMessageButton_Click" Grid.Row="1"/>
+        <Label x:Name="InputLabel" Content="Ввод сообщений для пользователя:" HorizontalAlignment="Left" Height="29" Margin="141,116,0,0" VerticalAlignment="Top" Width="250" Grid.Column="1" Grid.Row="1"/>
+
     </Grid>
 </Window>

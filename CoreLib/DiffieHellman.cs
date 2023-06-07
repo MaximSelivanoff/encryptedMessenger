@@ -9,8 +9,8 @@ public class DiffieHellman
     public BigInteger _prime { get; }
     public BigInteger _generator { get;}
     private readonly Random _rng;
-    private readonly BigInteger _privateKey;
-    private readonly BigInteger _publicKey;
+    public BigInteger _privateKey { get; }
+    public BigInteger _publicKey { get; }
 
     public DiffieHellman(int keySize = 48)
     {

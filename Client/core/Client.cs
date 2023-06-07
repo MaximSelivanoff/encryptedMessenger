@@ -7,6 +7,9 @@ using System.Text;
 using CoreLib;
 using System.Numerics;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
+using System.Linq;
+using static Server.core.Server;
 
 namespace Client.core
 {
@@ -20,9 +23,16 @@ namespace Client.core
         Socket tcpSocket;
         Socket listener;
         DiffieHellman Bob;
+        public delegate void ChatMessagesHandler(string message);
+        ChatMessagesHandler chatHandler;
+        BigInteger keyForRc4;
+
+        RC4 rc4;
 
         string clientLogin;
         string clientPassword;
+
+        public bool ChatIsActive { get; private set; }
 
         public Client()
         {
@@ -30,6 +40,8 @@ namespace Client.core
             tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             System.Threading.Thread.Sleep(1000);
             tcpSocket.Connect(tcpEndPoint);
+
+            ChatIsActive = false;
         }
 
         public void AddMessageHandler(MessageHandler messageHandler)
@@ -104,25 +116,30 @@ namespace Client.core
                     RsaKeyProcessing(answerStrings[1], answerStrings[2], answerStrings[3], answerStrings[4]);
                     break;
                 case (int)NetworkCodes.MessageCodes.DiffieHellmanExchange:
-                    DiffieHellmanProcessing(answerStrings[1]);
+                    DiffieHellmanProcessing(answerStrings[1], answerStrings[2],answerStrings[3], out keyForRc4);
                     messageHandler("Получен запрос на соединение по Диффи-Хеллману");
                     break;
                 case (int)NetworkCodes.MessageCodes.DiffieHellmanExchangeSuccess:
                     messageHandler("Обмен ключами по протоолу Диффи-Хеллмана прошёл успешно");
+                    ActivateChat(keyForRc4.ToString());
                     break;
                 case (int)NetworkCodes.MessageCodes.DiffieHellmanExchangeError:
                     messageHandler("Обмен ключами по протоколу Диффи-Хеллмана не удался");
                     break;
+                case (int)NetworkCodes.MessageCodes.ChatMessage:
+                    ChatGet(answerStrings[1]);
+                    break;
             }
         }
 
-        private void DiffieHellmanProcessing(string otherKey)
+        private void DiffieHellmanProcessing(string otherKey, string otherPrime,string otherGenerator, out BigInteger keyForRc4)
         {
-            Bob = new DiffieHellman();
-            Bob.GenerateSharedSecret(BigInteger.Parse(otherKey));
+            Bob = new DiffieHellman(BigInteger.Parse(otherPrime), BigInteger.Parse(otherGenerator));
+            keyForRc4 = Bob.GenerateSharedSecret(BigInteger.Parse(otherKey));
             var publicKey = Bob.PublicKey.ToString();
             var resultString = NetworkCodes.GetMessage(NetworkCodes.MessageCodes.DiffieHellmanExchange, publicKey);
             Send(resultString);
+            
         }
 
         private void RsaKeyProcessing(string nonce, string encodedNonceHashString, string N, string e)
@@ -168,6 +185,47 @@ namespace Client.core
             clientLogin = login;
             clientPassword = password;
         }
+
+        void ActivateChat(string key)
+        {
+            ChatIsActive = true;
+            var byteKey = Encoding.UTF8.GetBytes(key);
+            rc4 = new RC4(byteKey);
+        }
+        public void ChatSend(string message)
+        {
+            var chiperMessage = rc4.Encrypt(Encoding.UTF8.GetBytes(message));
+            var netMess = NetworkCodes.GetMessage(NetworkCodes.MessageCodes.ChatMessage, Encoding.UTF8.GetString(chiperMessage));
+            Send(netMess);
+
+            var binMess = string.Join("", message.Select(b => Convert.ToString(b, 2)));
+            var binEncodedMess = string.Join("", chiperMessage.Select(b => Convert.ToString(b, 2)));
+
+            chatHandler($"Отправлено в {DateTime.Now}:\n{message}\n" +
+                $"Бинарное представление сообщения: {binMess}\n" +
+            $"Бинарное представление зашифрованного сообщения:\n{binEncodedMess}\n\n");
+        }
+        public void ChatGet(string chiperMessage)
+        {
+
+            var message = rc4.Decrypt(Encoding.UTF8.GetBytes(chiperMessage));
+
+            var binMess = string.Join("", message.Select(b => Convert.ToString(b, 2)));
+            var binEncodedMess = string.Join("", chiperMessage.Select(b => Convert.ToString(b, 2)));
+
+            chatHandler($"Получено в {DateTime.Now}:\n{Encoding.UTF8.GetString(message)}\n" +
+                $"Бинарное представление сообщения: {binMess}\n" +
+            $"Бинарное представление полученного зашифрованного сообщения:\n{binEncodedMess}\n\n");
+        }
+        public void AddChatHandler(ChatMessagesHandler newHandler)
+        {
+            chatHandler += newHandler;
+        }
+        public void RemoveChatHandler(ChatMessagesHandler newHandler)
+        {
+            if (chatHandler != null)
+                chatHandler -= newHandler;
+        }
     }
-    
+
 }

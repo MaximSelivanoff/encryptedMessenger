@@ -35,6 +35,7 @@ namespace CoreLib
             DiffieHellmanExchangeError = 51,
             DiffieHellmanExchangeSuccess = 52,
 
+            ChatMessage = 60
 
         }
         /// <summary>

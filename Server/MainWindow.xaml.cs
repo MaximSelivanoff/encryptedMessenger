@@ -70,5 +70,12 @@ namespace Server
             ));
             
         }
+
+        private void SendMessageButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(OutputMessageTextBlock.Text))
+                return;
+            server.ChatSend(OutputMessageTextBlock.Text);
+        }
     }
 }

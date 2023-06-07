@@ -12,11 +12,12 @@ namespace Server.core
             var publicKey = Alice.PublicKey;
 
             var resultString = NetworkCodes.GetMessage(NetworkCodes.MessageCodes.DiffieHellmanExchange,
-                                                       publicKey.ToString());
-
+                                                       publicKey.ToString(),
+                                                       Alice._prime.ToString(),
+                                                       Alice._generator.ToString());
+            logHandler(ServerLogMessages.DiffieHellmanGenerated(Alice._prime.ToString(), Alice._generator.ToString(), Alice._privateKey.ToString()));
             logHandler(ServerLogMessages.DiffieHellmanExchangeDataSended(publicKey.ToString()));
             return resultString;
         }
-
     }
 }

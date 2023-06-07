@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CoreLib;
 using System.Numerics;
+using System.Net.Http;
 
 namespace Server.core
 {
@@ -17,16 +18,21 @@ namespace Server.core
         const int port = 8081;
         IPEndPoint tcpEndPoint;
         Socket tcpListener;
+        Socket tcpClient;
         StringBuilder data;
         public delegate void LogHandler(string message);
         public LogHandler logHandler;
         DiffieHellman Alice;
+        RC4 rc4;
+        bool startChat;
+
         public Server()
         {
             tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tcpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
             tcpListener.Bind(tcpEndPoint);
             context = new ApplicationContext();
+            startChat = false;
         }
         public async Task StartAsync()
         {
@@ -34,7 +40,7 @@ namespace Server.core
 
             while (true)
             {
-                var tcpClient = await tcpListener.AcceptAsync();
+                tcpClient = await tcpListener.AcceptAsync();
                 await ClientProcessing(tcpClient);
             }
         }
@@ -105,9 +111,16 @@ namespace Server.core
             }
             if(messageCode == (int)NetworkCodes.MessageCodes.DiffieHellmanExchange)
             {
-                bool startNext;
-                var returnData = DiffieHellmanProcessing(dataStrings[1], out startNext);
+                var returnData = DiffieHellmanProcessing(dataStrings[1], out startChat, out var key);
                 await tcpClient.SendAsync(returnData);
+                if(startChat)
+                {
+                    rc4 = new RC4(Encoding.UTF8.GetBytes(key.ToString()));
+                }
+            }
+            if (messageCode == (int)NetworkCodes.MessageCodes.ChatMessage)
+            {
+                ChatGet(dataStrings[1]);
             }
 
         }
@@ -138,14 +151,14 @@ namespace Server.core
             var data = Encoding.UTF8.GetBytes(dataString);
             return data;
         }
-        private byte[] DiffieHellmanProcessing(string otherPublicKey, out bool startNext)
+        private byte[] DiffieHellmanProcessing(string otherPublicKey, out bool startNext, out BigInteger keyForRc4)
         {
-            Alice = new DiffieHellman();
             var secret = Alice.GenerateSharedSecret(BigInteger.Parse(otherPublicKey));
             var dataString = NetworkCodes.GetMessage(NetworkCodes.MessageCodes.DiffieHellmanExchangeSuccess);
             var data = Encoding.UTF8.GetBytes(dataString);
             logHandler(ServerLogMessages.DiffieHellmanExchangeDataRecieving(otherPublicKey, secret.ToString()));
             startNext = true;
+            keyForRc4 = secret;
             return data;
         }
         public void tryRegistrateAccount(string login, string password)
@@ -249,6 +262,23 @@ namespace Server.core
         {
             if(logHandler!= null)
                 logHandler -= newHandler;
+        }
+
+        public void ChatGet(string message)
+        {
+            var byteMessage = Encoding.UTF8.GetBytes(message);
+            logHandler(ServerLogMessages.GetChatMessage(message));
+            logHandler($"Расшифровка: {Encoding.UTF8.GetString(rc4.Decrypt(byteMessage))}");
+        }
+        public async void ChatSend(string message)
+        {
+            if (!startChat)
+                return;
+            var chiperMessage = rc4.Encrypt(Encoding.UTF8.GetBytes(message));
+            var netMess = NetworkCodes.GetMessage(NetworkCodes.MessageCodes.ChatMessage, Encoding.UTF8.GetString(chiperMessage));
+            logHandler(ServerLogMessages.SendChatMessage(Encoding.UTF8.GetString(chiperMessage)));
+            logHandler($"Расшифровка: {message}");
+            await tcpClient.SendAsync(Encoding.UTF8.GetBytes(netMess));
         }
     }
 }

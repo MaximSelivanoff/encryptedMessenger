@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Policy;
 
 namespace Server
@@ -71,6 +72,11 @@ namespace Server
                                             ;
             return message;
         }
+        public static string DiffieHellmanGenerated(string p, string g, string private_key)
+        {
+            string message = $"{DateTime.Now}\nСгенерированы параметры Диффи-Хеллмана: \np: {p}\ng: {g}\nprivate key: {private_key}";
+            return message;
+        }
         public static string DiffieHellmanExchangeDataSended(string publicKey)
         {
             string message = $"{DateTime.Now}\nОтправлен публичный ключ Диффи-Хеллмана: {publicKey}";
@@ -81,6 +87,17 @@ namespace Server
             string message = $"{DateTime.Now}\nПолучен открытый ключ пользователя: {otherKey}" +
                              $"\nОбщий ключ Диффи-Хеллмана сгенерирован: {sharedKey}";
             return message;
+        }
+
+        public static string GetChatMessage(string message)
+        {
+            string logMessage = $"{DateTime.Now}\nПолучено сообщение: {message}";
+            return logMessage;
+        }
+        public static string SendChatMessage(string message)
+        {
+            string logMessage = $"{DateTime.Now}\nОтправлено сообщение: {message}";
+            return logMessage;
         }
     }
 }
