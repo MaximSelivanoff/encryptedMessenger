@@ -48,7 +48,7 @@
 
         <TextBox x:Name="OutputMessageTextBlock" IsEnabled="True" Grid.Column="1" HorizontalAlignment="Center" Margin="0,150,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="236" Height="53" Grid.Row="1"/>
         <Button x:Name="SendMessageButton" Grid.Column="1" Content="Отправить" HorizontalAlignment="Left" Height="53" Margin="382,150,0,0" VerticalAlignment="Top" Width="74" Click="SendMessageButton_Click" Grid.Row="1"/>
-        <Label x:Name="InputLabel" Content="Ввод сообщений для пользователя:" HorizontalAlignment="Left" Height="29" Margin="141,116,0,0" VerticalAlignment="Top" Width="250" Grid.Column="1" Grid.Row="1"/>
+        <Label x:Name="InputLabel" Content="Ввод сообщения для пользователей:" HorizontalAlignment="Left" Height="29" Margin="141,116,0,0" VerticalAlignment="Top" Width="250" Grid.Column="1" Grid.Row="1"/>
 
     </Grid>
 </Window>

@@ -21,8 +21,8 @@ namespace Server
         string? GetConnectionStringFromJson()
         {
             var builder = new ConfigurationBuilder();
-            //builder.SetBasePath(Directory.GetCurrentDirectory());
-            builder.SetBasePath(@"C:\Users\PC\source\repos\EncryptedMessenger\Server\bin\Debug\net7.0-windows");
+            builder.SetBasePath(Directory.GetCurrentDirectory());
+            //builder.SetBasePath(@"C:\Users\PC\source\repos\EncryptedMessenger\Server\bin\Debug\net7.0-windows");
             builder.AddJsonFile("appsettings.json");
             var config = builder.Build();
             string? connectionString = config.GetConnectionString("DefaultConnection");
